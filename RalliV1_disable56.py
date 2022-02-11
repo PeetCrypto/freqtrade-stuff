@@ -45,7 +45,7 @@ def EWO(dataframe, ema_length=5, ema2_length=35):
 
 
 
-class RalliV1(IStrategy):
+class RalliV1_disable56(IStrategy):
     INTERFACE_VERSION = 2
 
     # ROI table:
@@ -231,30 +231,30 @@ class RalliV1(IStrategy):
             )
         )
         
-        conditions.append(
-            (   
-                (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] > dataframe['ema_100'])&
-                (dataframe['rsi_fast'] <35)&
-                (dataframe['rsi_fast'] >4)&
-                (dataframe['close'] < (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] * self.low_offset_2.value)) &
-                (dataframe['EWO'] > self.ewo_high_2.value) &
-                (dataframe['rsi'] < self.rsi_buy.value) &
-                (dataframe['volume'] > 0)&
-                (dataframe['close'] < (dataframe[f'ma_sell_{self.base_nb_candles_sell.value}'] * self.high_offset.value))&
-                (dataframe['rsi']<25)
-            )
-        )        
+        # conditions.append(
+        #     (   
+        #         (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] > dataframe['ema_100'])&
+        #         (dataframe['rsi_fast'] <35)&
+        #         (dataframe['rsi_fast'] >4)&
+        #         (dataframe['close'] < (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] * self.low_offset_2.value)) &
+        #         (dataframe['EWO'] > self.ewo_high_2.value) &
+        #         (dataframe['rsi'] < self.rsi_buy.value) &
+        #         (dataframe['volume'] > 0)&
+        #         (dataframe['close'] < (dataframe[f'ma_sell_{self.base_nb_candles_sell.value}'] * self.high_offset.value))&
+        #         (dataframe['rsi']<25)
+        #     )
+        # )        
 
-        conditions.append(
-            (   (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] > dataframe['ema_100'])&
-                (dataframe['rsi_fast'] < 35)&
-                (dataframe['rsi_fast'] >4)&
-                (dataframe['close'] < (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] * self.low_offset.value)) &
-                (dataframe['EWO'] < self.ewo_low.value) &
-                (dataframe['volume'] > 0)&
-                (dataframe['close'] < (dataframe[f'ma_sell_{self.base_nb_candles_sell.value}'] * self.high_offset.value)) 
-            )
-        )
+        # conditions.append(
+        #     (   (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] > dataframe['ema_100'])&
+        #         (dataframe['rsi_fast'] < 35)&
+        #         (dataframe['rsi_fast'] >4)&
+        #         (dataframe['close'] < (dataframe[f'ma_buy_{self.base_nb_candles_buy.value}'] * self.low_offset.value)) &
+        #         (dataframe['EWO'] < self.ewo_low.value) &
+        #         (dataframe['volume'] > 0)&
+        #         (dataframe['close'] < (dataframe[f'ma_sell_{self.base_nb_candles_sell.value}'] * self.high_offset.value)) 
+        #     )
+        # )
         if conditions:
             dataframe.loc[
                 reduce(lambda x, y: x | y, conditions),
