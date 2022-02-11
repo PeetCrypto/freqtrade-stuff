@@ -41,64 +41,59 @@ class StochRSITEMA(IStrategy):
     INTERFACE_VERSION = 2
 
     """
-    HYPEROPT SETTINGS
-    The following is set by Hyperopt, or can be set by hand if you wish:
-
-    - minimal_roi table
-    - stoploss
-    - trailing stoploss
-    - for buy
-        - Stoch lower band location (range: 10-50)
-        - RSI period (range: 5-30)
-        - RSI lower band location (range: 10-50)
-    - for sell
-        - TEMA period (range: 5-50)
-        - TEMA trigger (close, average, both (open and close))
-
     PASTE OUTPUT FROM HYPEROPT HERE
     """
 
+    # 47/50:     19 trades. 7/6/6 Wins/Draws/Losses. Avg profit  -0.35%. Median profit   0.00%. Total profit -0.00006706 BTC (  -6.69Σ%). Avg duration  80.3 min. Objective: 1.98291
+
     # Buy hyperspace params:
     buy_params = {
-       'rsi-lower-band': 46,
-       'rsi-period': 30,
-       'stoch-lower-band': 23
+     'rsi-lower-band': 36, 'rsi-period': 15, 'stoch-lower-band': 48
     }
 
     # Sell hyperspace params:
     sell_params = {
-        'tema-period': 8,
-        'tema-trigger': 'close'
+     'tema-period': 5, 'tema-trigger': 'close'
     }
 
     # ROI table:
     minimal_roi = {
-        "0": 0.13771,
-        "17": 0.07172,
-        "31": 0.01378,
-        "105": 0
+        "0": 0.19503,
+        "13": 0.09149,
+        "36": 0.02891,
+        "64": 0
     }
 
     # Stoploss:
-    stoploss = -0.3279
+    stoploss = -0.02205
 
     # Trailing stop:
     trailing_stop = True
-    trailing_stop_positive = 0.32791
-    trailing_stop_positive_offset = 0.40339
-    trailing_only_offset_is_reached = True
+    trailing_stop_positive = 0.17251
+    trailing_stop_positive_offset = 0.2516
+    trailing_only_offset_is_reached = False
 
 
     """
     END HYPEROPT
     """
 
-    # Just here for easier adjustments if desired
-    stoch_params = {
-        'stoch-fastk-period': 14,
-        'stoch-slowk-period': 3,
-        'stoch-slowd-period': 3,
-    }
+    # Ranges for dynamic indicator periods
+    rsiStart = 5
+    rsiEnd = 30
+    temaStart = 5
+    temaEnd = 50
+
+    # Stochastic Params
+    fastkPeriod = 14
+    slowkPeriod = 3
+    slowdPeriod = 3
+
+    # Make sure these match or are not overridden in config
+    use_sell_signal = True
+    sell_profit_only = True
+    sell_profit_offset = 0.01
+    ignore_roi_if_buy_signal = False
 
     timeframe = '5m'
 
@@ -107,59 +102,68 @@ class StochRSITEMA(IStrategy):
 
     # Number of candles the strategy requires before producing valid signals
     # Set this to the highest period value in the indicator_params dict or highest of the ranges in the hyperopt settings (default: 72)
-    startup_candle_count: int = 72
-
-    """
-    Not currently being used for anything, thinking about implementing this later.
-    """
-    def informative_pairs(self):
-        # https://www.freqtrade.io/en/latest/strategy-customization/#additional-data-informative_pairs
-        informative_pairs = [(f"{self.config['stake_currency']}/USD", self.timeframe)]
-        return informative_pairs
+    startup_candle_count: int = 50
 
     """
     Populate all of the indicators we need (note: indicators are separate for buy/sell)
     """
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+
+        for rsip in range(self.rsiStart, (self.rsiEnd + 1)):
+            dataframe[f'rsi({rsip})'] = ta.RSI(dataframe, timeperiod=rsip)
+
+        for temap in range(self.temaStart, (self.temaEnd + 1)):
+            dataframe[f'tema({temap})'] = ta.TEMA(dataframe, timeperiod=temap)
+
         # Stochastic Slow
         # fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
-        stoch_slow = ta.STOCH(dataframe, fastk_period=self.stoch_params['stoch-fastk-period'], slowk_period=self.stoch_params['stoch-slowk-period'], slowd_period=self.stoch_params['stoch-slowd-period'])
+        stoch_slow = ta.STOCH(dataframe, fastk_period=self.fastkPeriod,
+                              slowk_period=self.slowkPeriod, slowd_period=self.slowdPeriod)
         dataframe['stoch-slowk'] = stoch_slow['slowk']
         dataframe['stoch-slowd'] = stoch_slow['slowd']
-
-        # RSI
-        dataframe['rsi'] = ta.RSI(dataframe, timeperiod=self.buy_params['rsi-period'])
-
-        # TEMA - Triple Exponential Moving Average
-        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=self.sell_params['tema-period'])
 
         return dataframe
 
     def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        params = self.buy_params
 
-        dataframe.loc[
-            (
-                (qtpylib.crossed_above(dataframe['rsi'], self.buy_params['rsi-lower-band'])) &  # Signal: RSI crosses above lower band
-                (qtpylib.crossed_above(dataframe['stoch-slowd'], self.buy_params['stoch-lower-band'])) &  # Signal: Stoch slowd crosses above lower band
-                (qtpylib.crossed_above(dataframe['stoch-slowk'], self.buy_params['stoch-lower-band'])) &  # Signal: Stoch slowk crosses above lower band
-                (qtpylib.crossed_above(dataframe['stoch-slowk'], dataframe['stoch-slowd'])) &  # Signal: Stoch slowk crosses slowd
-                (dataframe['volume'] > 0)  # Make sure Volume is not 0
-            ),
-            'buy'] = 1
+        conditions = []
+
+        conditions.append(
+            dataframe[f"rsi({params['rsi-period']})"] > params['rsi-lower-band'])
+        conditions.append(qtpylib.crossed_above(
+            dataframe['stoch-slowd'], params['stoch-lower-band']))
+        conditions.append(qtpylib.crossed_above(
+            dataframe['stoch-slowk'], params['stoch-lower-band']))
+        conditions.append(qtpylib.crossed_above(
+            dataframe['stoch-slowk'], dataframe['stoch-slowd']))
+
+        # Check that the candle had volume
+        conditions.append(dataframe['volume'] > 0)
+
+        if conditions:
+            dataframe.loc[
+                reduce(lambda x, y: x & y, conditions),
+                'buy'] = 1
 
         return dataframe
 
     def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        params = self.sell_params
 
         conditions = []
-        if self.sell_params['tema-trigger'] == 'close':
-            conditions.append(dataframe['close'] < dataframe['tema'])
-        if self.sell_params['tema-trigger'] == 'both':
-            conditions.append((dataframe['close'] < dataframe['tema']) & (dataframe['open'] < dataframe['tema']))
-        if self.sell_params['tema-trigger'] == 'average':
-            conditions.append(((dataframe['close'] + dataframe['open']) / 2) < dataframe['tema'])
+        
+        if params.get('tema-trigger') == 'close':
+            conditions.append(
+                dataframe['close'] < dataframe[f"tema({params['tema-period']})"])
+        if params.get('tema-trigger') == 'both':
+            conditions.append((dataframe['close'] < dataframe[f"tema({params['tema-period']})"]) & (
+                dataframe['open'] < dataframe[f"tema({params['tema-period']})"]))
+        if params.get('tema-trigger') == 'average':
+            conditions.append(
+                ((dataframe['close'] + dataframe['open']) / 2) < dataframe[f"tema({params['tema-period']})"])
 
-        # Check that volume is not 0
+        # Check that the candle had volume
         conditions.append(dataframe['volume'] > 0)
 
         if conditions:

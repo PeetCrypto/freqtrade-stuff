@@ -179,7 +179,7 @@ class TrixStrategy(IStrategy):
         trixLength = 9
         trixSignal = 21
         dataframe['trix'] = ta.trend.ema_indicator(ta.trend.ema_indicator(ta.trend.ema_indicator(close=dataframe['close'], window=trixLength), window=trixLength), window=trixLength)
-        dataframe['trix_pct'] = dataframe['trix'].pct_change()*100
+        dataframe['trix_pct'] = dataframe['trix'].pct_change() * 100
         dataframe['trix_signal'] = ta.trend.sma_indicator(dataframe['trix_pct'],trixSignal)
         dataframe['trix_histo'] = dataframe['trix_pct'] - dataframe['trix_signal']
 

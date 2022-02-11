@@ -20,16 +20,17 @@ def bollinger_bands(stock_price, window_size, num_of_std):
 
 class XebTradeStrat(IStrategy):
     minimal_roi = {
-    #    "0": 0.0125
-      "0": 0.99
+      "4": 0.002,
+      "2": 0.005,
+      "0": 0.01
     }
 
-    stoploss = -0.05
+    stoploss = -0.01
     timeframe = '1m'
     trailing_stop = True
     trailing_only_offset_is_reached = True
-    trailing_stop_positive_offset = 0.0015  # Trigger positive stoploss once crosses above this percentage
-    trailing_stop_positive = 0.001 # Sell asset if it dips down this much
+    trailing_stop_positive_offset = 0.001  # Trigger positive stoploss once crosses above this percentage
+    trailing_stop_positive = 0.0005 # Sell asset if it dips down this much
 
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:

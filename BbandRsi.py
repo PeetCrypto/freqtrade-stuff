@@ -7,16 +7,12 @@ import freqtrade.vendor.qtpylib.indicators as qtpylib
 
 # --------------------------------
 
-
+#freqtrade backtesting --strategy BbandRsi
 class BbandRsi(IStrategy):
     """
-
     author@: Gert Wohlgemuth
-
     converted from:
-
     https://github.com/sthewissen/Mynt/blob/master/src/Mynt.Core/Strategies/BbandRsi.cs
-
     """
 
     # Minimal ROI designed for the strategy.
@@ -30,7 +26,7 @@ class BbandRsi(IStrategy):
     stoploss = -0.25
 
     # Optimal timeframe for the strategy
-    timeframe = '1h'
+    timeframe = '1m'
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)

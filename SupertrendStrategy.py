@@ -96,7 +96,6 @@ class SupertrendStrategy(IStrategy):
 
     # Hyperoptable parameters
     buy_stoch_rsi = DecimalParameter(0.5, 1, decimals=3, default=0.8, space="buy")
-    buy_ema_timeperiod = IntParameter(low=10, high=100, default=50, space='buy')
     sell_stoch_rsi = DecimalParameter(0, 0.5, decimals=3, default=0.2, space="sell")
 
     # Optimal timeframe for the strategy.
@@ -111,7 +110,7 @@ class SupertrendStrategy(IStrategy):
     ignore_roi_if_buy_signal = False
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 30
+    startup_candle_count: int = 90
 
     # Optional order type mapping.
     order_types = {
@@ -184,23 +183,23 @@ class SupertrendStrategy(IStrategy):
         dataframe['ema90'] = ta.trend.ema_indicator(dataframe['close'], 90)
 
         # Supertrend
-        ST_length = 20
-        ST_multiplier = 3.0
-        superTrend = pda.supertrend(dataframe['high'],dataframe['low'],dataframe['close'],length=ST_length,multiplier=ST_multiplier)
-        dataframe['supertrend_1'] = superTrend['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier)]
-        dataframe['supertrend_direction_1'] = superTrend['SUPERTd_'+str(ST_length)+"_"+str(ST_multiplier)]
+        supertrend_length = 20
+        supertrend_multiplier = 3.0
+        superTrend = pda.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=supertrend_length, multiplier=supertrend_multiplier)
+        dataframe['supertrend_1'] = superTrend['SUPERT_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
+        dataframe['supertrend_direction_1'] = superTrend['SUPERTd_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
         
-        ST_length = 20
-        ST_multiplier = 4.0
-        superTrend = pda.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=ST_length, multiplier=ST_multiplier)
-        dataframe['supertrend_2'] = superTrend['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier)]
-        dataframe['supertrend_direction_2'] = superTrend['SUPERTd_'+str(ST_length)+"_"+str(ST_multiplier)]
+        supertrend_length = 20
+        supertrend_multiplier = 4.0
+        superTrend = pda.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=supertrend_length, multiplier=supertrend_multiplier)
+        dataframe['supertrend_2'] = superTrend['SUPERT_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
+        dataframe['supertrend_direction_2'] = superTrend['SUPERTd_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
         
-        ST_length = 40
-        ST_multiplier = 8.0
-        superTrend = pda.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=ST_length, multiplier=ST_multiplier)
-        dataframe['supertrend_3'] = superTrend['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier)]
-        dataframe['supertrend_direction_3'] = superTrend['SUPERTd_'+str(ST_length)+"_"+str(ST_multiplier)]
+        supertrend_length = 40
+        supertrend_multiplier = 8.0
+        superTrend = pda.supertrend(dataframe['high'], dataframe['low'], dataframe['close'], length=supertrend_length, multiplier=supertrend_multiplier)
+        dataframe['supertrend_3'] = superTrend['SUPERT_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
+        dataframe['supertrend_direction_3'] = superTrend['SUPERTd_' + str(supertrend_length) + "_" + str(supertrend_multiplier)]
 
         return dataframe
 

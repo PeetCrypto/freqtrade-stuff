@@ -1,0 +1,156 @@
+{
+  "max_open_trades": 4,
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+   "tradable_balance_ratio": 0.99,
+	"available_capital": 1000,
+	"amend_last_stake_amount": true,
+    "fiat_display_currency": "USD",
+    "timeframe": "5m",
+    "dry_run": false,
+    "cancel_open_orders_on_exit": false,
+    "forcebuy_enable": true,
+    "unfilledtimeout": {
+        "buy": 15,
+        "sell": 30,
+        "unit": "minutes"
+    },
+    "order_types": {
+        "buy": "market",
+        "sell": "market",
+        "forcesell": "market",
+        "forcebuy": "market",
+        "emergencysell": "market",
+        "trailing_stop_loss": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false,
+        "stoploss_on_exchange_interval": 60 
+    },
+    "bid_strategy": {
+        "price_side": "ask",
+        "ask_last_balance": 0.0,
+        "use_order_book": false,
+        "order_book_top": 1,
+        "check_depth_of_market": {
+            "enabled": false,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "ask_strategy": {
+        "price_side": "bid",
+        "use_order_book": false,
+        "order_book_top": 1,
+        "order_book_max": 1    
+        },
+    "exchange": {
+    "name": "kucoin",
+    "key": "YOURS :)",
+    "secret": "YOURS :)",
+    "password": "YOURS :)",
+        "ccxt_config": {
+            "enableRateLimit": true,
+            "rateLimit": 220
+        },
+        "ccxt_async_config": {
+            "enableRateLimit": true,
+            "rateLimit": 220
+        },
+        "pair_whitelist": [
+        ],
+    "pair_blacklist": [
+      ".*(3|3L|3S)/.*",
+      "(AUD|EUR|GBP|CHF|CAD|JPY)/.*",
+      "(BUSD|USDT|TUSD|USDC|CUSDT|DAI|USDN|CUSD)/.*",
+      "(ACM|AFA|ALA|ALL|APL|ASR|ATM|BAR|CAI|CITY|FOR|GAL|GOZ|IBFK|JUV|LEG|LOCK-1|NAVI|NMR|NOV|OG|PFL|PSG|ROUSH|STV|TH|TRA|UCH|UFC|YBO)/.*",
+      "(LPT|LRC|LTX|MIR|SXP|ZEC|VELO|JUP|REAP|BNB|ETH|BTC|BCH|THETA|XMR|GTO|PERL|MITH|MBOX|HIVE|LYXE|BASIC|CHZ|HERO|POWR|HERO|SLP|XVS|MEM|AMPL|XYM|RLY|POLX|CARR|SKEY|MASK|KLV|TLOS|KEEP|SUN|AVA|NKN|MLN|AAVE|LAYER|CIRUS|SUKU|TKY|AOA|LSS|SUTER|TCP|INTER|HTR|SOLVE|CIX100|ETHO|ZCX|DINO|MXW|DAPPT|ONT|XDC|XDB|GENS|ANKR|BAT|EOS|STX|POLK|CHR|XYO|VEGA|KRL|VIDT|ORN|REVV|WILD|HAI|OXT|AI|CTSI|MUSK|NORD|TLM|EDG|JAR|BTCST|SUPER|XSR|VSYS|CBC|SCLP)/.*",
+        ]
+    },
+    "pairlists": [
+        {
+            "method": "VolumePairList",
+            "number_assets": 100,
+            "sort_key": "quoteVolume",
+            "refresh_period": 1800
+        },
+        {"method": "AgeFilter", "min_days_listed": 14},
+        {"method": "SpreadFilter", "max_spread_ratio": 0.006},
+        {
+            "method": "RangeStabilityFilter",
+            "lookback_days": 3,
+            "min_rate_of_change": 0.05,
+            "refresh_period": 1800
+        },
+        {
+            "method": "VolatilityFilter",
+            "lookback_days": 3,
+            "min_volatility": 0.02,
+            "max_volatility": 0.75,
+            "refresh_period": 2820
+        },
+        {
+            "method": "VolumePairList",
+            "number_assets": 80,
+            "sort_key": "quoteVolume",
+            "refresh_period": 1800
+        },
+        {"method": "ShuffleFilter"}
+    ],
+    "edge": {
+        "enabled": false,
+        "process_throttle_secs": 3600,
+        "calculate_since_number_of_days": 7,
+        "allowed_risk": 0.01,
+        "stoploss_range_min": -0.01,
+        "stoploss_range_max": -0.1,
+        "stoploss_range_step": -0.01,
+        "minimum_winrate": 0.60,
+        "minimum_expectancy": 0.20,
+        "min_trade_number": 10,
+        "max_trade_duration_minute": 1440,
+        "remove_pumps": false
+    },
+    "telegram": {
+        "enabled": true,
+        "token": "YOURS :)",
+        "chat_id": "YOURS :)",
+"keyboard": [
+            ["/profit","/balance","/status table","/daily"],
+            ["/performance","/logs","/show_config","/whitelist"],
+            ["/reload_config","/help","/start","/stop"]
+        ],
+        "notification_settings": {
+            "status": "silent",
+            "warning": "on",
+            "startup": "silent",
+            "buy": "silent",
+            "sell": "silent",
+            "buy_cancel": "off",
+            "sell_cancel": "off",
+            "buy_fill": "off",
+            "sell_fill": "off"
+        },
+        "balance_dust_level": 0.01
+    },
+    "api_server": {
+        "enabled": false,
+        "listen_ip_address": "0.0.0.0",
+        "listen_port": 8080,
+        "verbosity": "error",
+        "enable_openapi": false,
+        "jwt_secret_key": "YOURS :)",
+        "CORS_origins": [],
+        "username": "YOURS :)",
+        "password": "YOURS :)"
+    },
+    "bot_name": "freqtrade",
+    "initial_state": "running",
+    "forcebuy_enable": true,
+    "internals": {
+        "process_throttle_secs": 5
+    },
+
+//    "db_url": "sqlite:////freqtrade/user_data/tradesv3.sqlite",
+//    "user_data_dir" : "user_data",
+//    "strategy": "YOURS :)",
+//    "strategy_path": "user_data/strategies"
+}
