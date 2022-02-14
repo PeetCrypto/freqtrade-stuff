@@ -1,4 +1,3 @@
-
 # --- Do not remove these libs ---
 from freqtrade.strategy import IStrategy, merge_informative_pair
 from pandas import DataFrame
@@ -16,23 +15,7 @@ from technical.util import resample_to_interval, resampled_merge
 logger = logging.getLogger(__name__)
 
 def pivots_points(dataframe: pd.DataFrame, timeperiod=1, levels=4) -> pd.DataFrame:
-    """
-    Pivots Points
-    https://www.tradingview.com/support/solutions/43000521824-pivot-points-standard/
-    Formula:
-    Pivot = (Previous High + Previous Low + Previous Close)/3
-    Resistance #1 = (2 x Pivot) - Previous Low
-    Support #1 = (2 x Pivot) - Previous High
-    Resistance #2 = (Pivot - Support #1) + Resistance #1
-    Support #2 = Pivot - (Resistance #1 - Support #1)
-    Resistance #3 = (Pivot - Support #2) + Resistance #2
-    Support #3 = Pivot - (Resistance #2 - Support #2)
-    ...
-    :param dataframe:
-    :param timeperiod: Period to compare (in ticker)
-    :param levels: Num of support/resistance desired
-    :return: dataframe
-    """
+   
 
     data = {}
 
@@ -85,6 +68,7 @@ def create_ichimoku(dataframe, conversion_line_period, displacement, base_line_p
     dataframe[f'kijun_sen_{conversion_line_period}'] = ichimoku['kijun_sen']
     dataframe[f'senkou_a_{conversion_line_period}'] = ichimoku['senkou_span_a']
     dataframe[f'senkou_b_{conversion_line_period}'] = ichimoku['senkou_span_b']
+    return dataframe
 
 
 class Miku_PP_v3(IStrategy):
@@ -119,11 +103,11 @@ class Miku_PP_v3(IStrategy):
     
     plot_config = {
         'main_plot': {
-            'pivot_1d': {},
-            'rS1_1d': {},
-            'r1_1d': {},
-            's1_1d': {},
-            'senkou_b_88': {},
+            'pivot_1d': {'color': 'blue'},
+            'rS1_1d': {'color': 'orange'},
+            'r1_1d': {'color': 'green'},
+            's1_1d': {'color': 'red'},
+            'senkou_b_88': {'color': 'violet'},
         },
         'subplots': {
             'MACD': {
@@ -173,10 +157,10 @@ class Miku_PP_v3(IStrategy):
         """
         # dataframe normal
         """
-        """
+       
         create_ichimoku(dataframe, conversion_line_period=9, 
                         displacement=26, base_line_periods=26, laggin_span=52)
-        """
+        
         create_ichimoku(dataframe, conversion_line_period=20, 
                         displacement=88, base_line_periods=88, laggin_span=88)
 
@@ -185,14 +169,16 @@ class Miku_PP_v3(IStrategy):
 
         create_ichimoku(dataframe, conversion_line_period=355,
                         displacement=880, base_line_periods=175, laggin_span=175)
+      
+        create_ichimoku(dataframe, conversion_line_period=444,
+                        displacement=1000, base_line_periods=444, laggin_span=444)
 
 
-        dataframe['ema20'] = ta.EMA(dataframe, timeperiod=20)
+        #dataframe['ema20'] = ta.EMA(dataframe, timeperiod=20)
 
 
         """
         Notes: Start Trading
-
         * En 1m
         dataframe['ichimoku_ok'] = (
             (dataframe['kijun_sen_355_5m'] >= dataframe['tenkan_sen_355_5m']) &
@@ -204,11 +190,11 @@ class Miku_PP_v3(IStrategy):
             (dataframe['tenkan_sen_9'] >= dataframe['tenkan_sen_20']) &
             (dataframe['tenkan_sen_9'] >= dataframe['kijun_sen_9'])
         ).astype('int')
-
-        * En 5m
+         """
+        #Better
         dataframe['ichimoku_ok'] = (
             (dataframe['close'] > dataframe['pivot_1d']) &
-            (dataframe['r1_1d'] > dataframe['close']) &
+            #(dataframe['r1_1d'] > dataframe['close']) &
             (dataframe['kijun_sen_355'] >= dataframe['tenkan_sen_355']) &
             (dataframe['senkou_a_20'] > dataframe['senkou_b_20']) &
             (dataframe['kijun_sen_20'] > dataframe['tenkan_sen_88']) &
@@ -217,43 +203,14 @@ class Miku_PP_v3(IStrategy):
             (dataframe['tenkan_sen_9'] >= dataframe['tenkan_sen_20']) &
             (dataframe['tenkan_sen_9'] >= dataframe['kijun_sen_9'])
         ).astype('int')
-
-
-            (dataframe['pivot_1d'] > dataframe['ema20_5m']) anulo ema20_5m para ver si hace entradas en Dry Run
-
+        
+      
         dataframe['trending_over'] = (
-            (
+            (dataframe['pivot_1d'] > dataframe['close']) &
             (dataframe['senkou_b_444'] > dataframe['close'])
-            )
-            |
-            (
-            (dataframe['pivot_1d'] > dataframe['close'])
-            )
-            
         ).astype('int')
-
         return dataframe
-        """
-
-        # Start Trading
-
-        dataframe['pivots_ok'] = (
-            (dataframe['close'] > dataframe['pivot_1d']) &
-            (dataframe['rS1_1d'] > dataframe['close']) &
-            (dataframe['kijun_sen_355'] >= dataframe['tenkan_sen_355']) &
-            (dataframe['senkou_a_20'] > dataframe['senkou_b_20'])
-        ).astype('int')        
-
-        
-        dataframe['trending_over'] = (
-            
-            (dataframe['senkou_b_88'] > dataframe['close'])
-            
-        ).astype('int')
-
-        return dataframe
-        
-
+       
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
 
         dataframe = self.slow_tf_indicators(dataframe, metadata)
@@ -264,7 +221,7 @@ class Miku_PP_v3(IStrategy):
 
         dataframe.loc[
             (
-                (dataframe['pivots_ok'] > 0)
+                (dataframe['ichimoku_ok'] > 0)
             ), 'buy'] = 1
         return dataframe
 
